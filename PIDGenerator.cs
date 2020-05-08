@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -25,13 +26,13 @@ namespace REBGV.Functions
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             string name = data?.name;
 
-            List<string> pids = GeneratePIDs.Generate(5);
+            string jsonResponse = JsonConvert.SerializeObject(GeneratePIDs.Generate(5));
 
             string responseMessage = string.IsNullOrEmpty(name)
                 ? "This HTTP triggered function executed successfully. Please pass a name in the request body for a personalized response."
                 : $"Hello, {name}. This HTTP triggered function executed successfully.";
 
-            return new OkObjectResult(responseMessage);
+            return new OkObjectResult(jsonResponse);
         }
     }
 }
