@@ -12,7 +12,7 @@ namespace REBGV.Functions
 {
     public static class PIDGenerator
     {
-        // Run() extracts a quantity from the incoming HTTP request.
+        // This is the entry point. Run() extracts a quantity from the incoming HTTP request.
 
         [FunctionName("PIDGenerator")]
         public static async Task<IActionResult> Run(
@@ -24,6 +24,8 @@ namespace REBGV.Functions
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             string name = data?.name;
+
+            List<string> pids = GeneratePIDs.Generate(5);
 
             string responseMessage = string.IsNullOrEmpty(name)
                 ? "This HTTP triggered function executed successfully. Please pass a name in the request body for a personalized response."
