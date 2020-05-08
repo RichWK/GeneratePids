@@ -12,6 +12,8 @@ namespace REBGV.Functions
 {
     public static class PIDGenerator
     {
+        // Run() extracts a quantity from the incoming HTTP request.
+
         [FunctionName("PIDGenerator")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
