@@ -5,7 +5,7 @@ namespace REBGV.Functions
     public class GeneratePIDs
     {
         private static int _limit { get; } = 10;
-        private static List<PID> _pids { get; } = new List<string>();
+        private static List<PID> _pids { get; } = new List<PID>();
 
         public static void Generate(int quantity)
         {
