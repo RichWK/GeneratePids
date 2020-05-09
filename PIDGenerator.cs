@@ -24,6 +24,9 @@ namespace REBGV.Functions
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
+
+            // 'userInput' expects an argument named 'quantity' in the request body.
+
             string userInput = data?.quantity;
 
             int quantity;
