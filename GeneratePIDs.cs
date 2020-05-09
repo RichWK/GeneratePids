@@ -8,15 +8,15 @@ namespace REBGV.Functions
 
         public static List<string> Generate(int quantity)
         {
-            // Fetches the latest PID from blob storage.
+            // Fetch the latest PID from blob storage.
             
             int latestPid = int.Parse("100000000");
 
-            // Validates the quantity, to make sure the built-in limit isn't exceeded.
+            // Validate the quantity, to make sure the built-in limit isn't exceeded.
 
             quantity = quantity <= _limit ? quantity : _limit;
 
-            // Creates PIDs equal to the quantity requested.
+            // Create PIDs equal to the quantity requested.
 
             List<string> pids = new List<string>();
 
