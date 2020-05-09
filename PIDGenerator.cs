@@ -24,15 +24,15 @@ namespace REBGV.Functions
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            string name = data?.name;
+            string userInput = data?.quantity;
 
-            string jsonResponse = JsonConvert.SerializeObject(GeneratePIDs.Generate(5));
+            int quantity;
 
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Please pass a name in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
+            string responseMessage = int.TryParse(userInput, out quantity)
+                ? JsonConvert.SerializeObject(GeneratePIDs.Generate(quantity))
+                : "This HTTP triggered function generates PIDs. Please pass a quantity between 1 and 10 in the request body.";
 
-            return new OkObjectResult(jsonResponse);
+            return new OkObjectResult(responseMessage);
         }
     }
 }
