@@ -8,6 +8,7 @@ namespace REBGV.Functions
 
         public static List<string> Generate(int quantity)
         {
+            // TODO:
             // Fetch the latest PID from blob storage.
             
             int latestPid = int.Parse("100000000");
