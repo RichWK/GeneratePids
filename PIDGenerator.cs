@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -12,6 +13,7 @@ namespace REBGV.Functions
 {
     public static class PIDGenerator
     {
+
         // Run() is the entry point: it extracts a quantity from the incoming HTTP request.
 
         [FunctionName("PIDGenerator")]
@@ -34,7 +36,38 @@ namespace REBGV.Functions
                 ? JsonConvert.SerializeObject(GeneratePIDs.Generate(quantity))
                 : "This HTTP triggered function generates PIDs. Please pass a quantity between 1 and 10 in the request body.";
 
+            responseMessage += FetchLatestPidFromBlobStorage();
+
             return new OkObjectResult(responseMessage);
         }
+
+
+        private static async Task<string> FetchLatestPidFromBlobStorage()
+        {
+            string sasToken = "secret...";
+            string storageAccount = "rebgvstordev";
+            string containerName = "Container Name";
+            string blobName = "LatestPID.txt";
+
+            string requestUri = $"https://{storageAccount}.blob.core.windows.net/{containerName}/{blobName}?{sasToken}";
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestUri);
+            request.Method = "GET";
+
+            using Stream requestStream = request.GetRequestStream();
+            string fileData = await requestStream.ReadAsync();
+            
+            using HttpWebResponse resp = (HttpWebResponse)request.GetResponse();
+
+            if (resp.StatusCode == HttpStatusCode.OK)
+            {
+                return "";
+            }
+            else {
+                return "";
+            }
+        }
+        
+
     }
 }
