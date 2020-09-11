@@ -51,13 +51,13 @@ namespace REBGV.Functions
 
             string requestUri = $"https://{storageAccount}.blob.core.windows.net/{containerName}/{blobName}?{sasToken}";
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestUri);
+            HttpWebRequest request = WebRequest.CreateHttp(requestUri);
             request.Method = "GET";
 
-            using Stream requestStream = request.GetRequestStream();
+            using Stream requestStream = request.GetRequestStreamAsync().Result;
             string fileData = await requestStream.ReadAsync();
             
-            using HttpWebResponse resp = (HttpWebResponse)request.GetResponse();
+            using HttpWebResponse resp = (HttpWebResponse)request.GetResponseAsync().Result;
 
             if (resp.StatusCode == HttpStatusCode.OK)
             {
