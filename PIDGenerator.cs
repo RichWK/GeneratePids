@@ -55,35 +55,5 @@ namespace REBGV.Functions
 
             return new OkObjectResult(responseMessage);
         }
-
-
-
-        // private static async Task<string> FetchLatestPidFromBlobStorage()
-        // {
-        //     string sasToken = "secret...";
-        //     string storageAccount = "rebgvstordev";
-        //     string containerName = "Container Name";
-        //     string blobName = "LatestPID.txt";
-
-        //     string requestUri = $"https://{storageAccount}.blob.core.windows.net/{containerName}/{blobName}?{sasToken}";
-
-        //     HttpWebRequest request = WebRequest.CreateHttp(requestUri);
-        //     request.Method = "GET";
-
-        //     using Stream requestStream = request.GetRequestStreamAsync().Result;
-        //     string fileData = await requestStream.ReadAsync();
-            
-        //     using HttpWebResponse resp = (HttpWebResponse)request.GetResponseAsync().Result;
-
-        //     if (resp.StatusCode == HttpStatusCode.OK)
-        //     {
-        //         return "";
-        //     }
-        //     else {
-        //         return "";
-        //     }
-        // }
-        
-
     }
 }
