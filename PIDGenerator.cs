@@ -51,8 +51,18 @@ namespace REBGV.Functions
                 ConnectionStringSetting = "CosmosDBConnection",
                 Id = "{Query.id}"
             )]
-            ToDoItem toDoItem)
+            ToDoItem toDoItem, ILogger log)
         {
+
+            if (toDoItem == null)
+            {
+                log.LogInformation("ToDoItem not found");
+            }
+            else
+            {
+                log.LogInformation($"Found ToDoItem, Description={toDoItem.Description}");
+            }
+
             return "";
         }
 
