@@ -19,6 +19,13 @@ namespace REBGV.Functions
         [FunctionName("PIDGenerator")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            [CosmosDB(
+                databaseName: "pid-database",
+                collectionName: "currentPid",
+                ConnectionStringSetting = "CosmosDBConnection",
+                Id = "{Query.id}"
+            )]
+            PidItem pidItem,
             ILogger log)
         {
             log.LogInformation("PIDGenerator function processed a request.");
@@ -36,35 +43,18 @@ namespace REBGV.Functions
                 ? JsonConvert.SerializeObject(GeneratePIDs.Generate(quantity))
                 : "This HTTP triggered function generates PIDs. Please pass a quantity between 1 and 10 in the request body.";
 
-            // responseMessage += FetchCurrentPidFromCosmosDb();
+            if (pidItem == null)
+            {
+                log.LogInformation("PidItem not found");
+            }
+            else
+            {
+                log.LogInformation($"Found PidItem, Description={pidItem.Description}");
+            }
 
             return new OkObjectResult(responseMessage);
         }
 
-
-        // Here we talk to the CosmosDB database.
-
-        private static async Task<string> FetchCurrentPidFromCosmosDb(
-            [CosmosDB(
-                databaseName: "pid-database",
-                collectionName: "currentPid",
-                ConnectionStringSetting = "CosmosDBConnection",
-                Id = "{Query.id}"
-            )]
-            ToDoItem toDoItem, ILogger log)
-        {
-
-            if (toDoItem == null)
-            {
-                log.LogInformation("ToDoItem not found");
-            }
-            else
-            {
-                log.LogInformation($"Found ToDoItem, Description={toDoItem.Description}");
-            }
-
-            return "";
-        }
 
 
         // private static async Task<string> FetchLatestPidFromBlobStorage()
