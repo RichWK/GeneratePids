@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net;
+﻿using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -36,9 +34,22 @@ namespace REBGV.Functions
                 ? JsonConvert.SerializeObject(GeneratePIDs.Generate(quantity))
                 : "This HTTP triggered function generates PIDs. Please pass a quantity between 1 and 10 in the request body.";
 
-            // responseMessage += FetchLatestPidFromBlobStorage();
+            // responseMessage += FetchCurrentPidFromCosmosDb();
 
             return new OkObjectResult(responseMessage);
+        }
+
+
+        private static async Task<string> FetchCurrentPidFromCosmosDb(
+            [CosmosDB(
+                databaseName: "pid-database",
+                collectionName: "currentPid",
+                ConnectionStringSetting = "CosmosDBConnection",
+                Id = "{Query.id}",
+                PartitionKey = "{Query.partitionKey}")] ToDoItem toDoItem
+            )
+        {
+            return "";
         }
 
 
