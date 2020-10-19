@@ -7,7 +7,8 @@ namespace REBGV.Functions
         [JsonProperty("id")]
         public string id { get; set; }
 
-        public string Description { get; set; }
+        [JsonProperty("currentPid")]
+        public string CurrentPid { get; set; }
     }
 }
 

@@ -50,7 +50,7 @@ namespace REBGV.Functions
             }
             else
             {
-                log.LogInformation($"Found PidItem, Description={pidItem.Description}");
+                log.LogInformation($"Found PidItem, Description={pidItem.CurrentPid}");
             }
 
             return new OkObjectResult(responseMessage);
