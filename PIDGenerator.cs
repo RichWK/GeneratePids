@@ -12,7 +12,9 @@ namespace REBGV.Functions
     public static class PIDGenerator
     {
 
-        // Run() is the entry point: it extracts a quantity from the incoming HTTP request.
+        // This method, Run(), is the entry point.
+        // It extracts a quantity from the incoming HTTP request, as long as it's a POST request and has a quantity supplied in the body.
+        // For a GET request it responds back with instructions.
 
         [FunctionName("PIDGenerator")]
         public static async Task<IActionResult> Run(
