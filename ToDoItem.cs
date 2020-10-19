@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace GeneratePIDs
+namespace REBGV.Functions
 {
     public class ToDoItem
     {
