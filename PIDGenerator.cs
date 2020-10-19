@@ -18,7 +18,7 @@ namespace REBGV.Functions
         supplied in the body. For a GET request it responds back with instructions.
 
         It also initiates a connection to an instance of CosmosDB and retrieves the most
-        current PID value. */
+        current PID value within a 'PidDbItem' object. */
 
         [FunctionName("PIDGenerator")]
         public static async Task<IActionResult> Run(
