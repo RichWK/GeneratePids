@@ -23,7 +23,8 @@ namespace REBGV.Functions
                 databaseName: "pid-database",
                 collectionName: "currentPid",
                 ConnectionStringSetting = "CosmosDBConnection",
-                Id = "{Query.id}"
+                Id = "1",
+                PartitionKey = "1"
             )]
             PidItem pidItem,
             ILogger log)
