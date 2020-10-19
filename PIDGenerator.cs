@@ -12,7 +12,6 @@ namespace REBGV.Functions
 {
     public static class PIDGenerator
     {
-
         /* This method, Run(), is the entry point.
 
         It extracts a quantity from an incoming POST request, so long as a quantity was
