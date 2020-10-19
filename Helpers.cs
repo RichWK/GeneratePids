@@ -2,16 +2,15 @@ using System.Collections.Generic;
 
 namespace REBGV.Functions
 {
-    public class GeneratePIDs
+    public class Helpers
     {
         private static int _limit { get; } = 10;
 
-        public static List<string> Generate(int quantity)
+        public static List<string> Generate(string startingPid, int quantity)
         {
-            // TODO:
-            // Fetch the latest PID from blob storage.
-            
-            int latestPid = int.Parse("100000000");
+            int pid;
+
+            int.TryParse(startingPid, out pid);
 
             // Validate the quantity, to make sure the built-in limit isn't exceeded.
 
@@ -23,7 +22,7 @@ namespace REBGV.Functions
 
             for(int i = 0; i < quantity; i++)
             {
-                pids.Add(new PID(++latestPid).FormattedPid);
+                pids.Add(new Pid(++pid).FormattedPid);
             }
 
             return pids;

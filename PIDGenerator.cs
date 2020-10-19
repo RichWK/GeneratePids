@@ -1,24 +1,35 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using static REBGV.Functions.Helpers;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace REBGV.Functions
 {
     public static class PIDGenerator
     {
 
-        // This method, Run(), is the entry point.
-        // It extracts a quantity from the incoming HTTP request, as long as it's a POST request and has a quantity supplied in the body.
-        // For a GET request it responds back with instructions.
+        /* This method, Run(), is the entry point.
+
+        It extracts a quantity from an incoming POST request, so long as a quantity was
+        supplied in the body. For a GET request it responds back with instructions.
+
+        It also initiates a connection to an instance of CosmosDB and retrieves the most
+        current PID value. */
 
         [FunctionName("PIDGenerator")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            [HttpTrigger(
+                AuthorizationLevel.Anonymous,
+                "get",
+                "post",
+                Route = null
+            )]
+            HttpRequest req,
             [CosmosDB(
                 databaseName: "pid-database",
                 collectionName: "currentPid",
@@ -26,32 +37,25 @@ namespace REBGV.Functions
                 Id = "1",
                 PartitionKey = "1"
             )]
-            PidItem pidItem,
-            ILogger log)
+            PidDbItem pidDbItem,
+            ILogger log
+        )
         {
-            log.LogInformation("PIDGenerator function processed a request.");
+            log.LogInformation("PIDGenerator function began processing a request.");
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
 
-            // 'userInput' expects an argument named 'quantity' in the request body.
+            /* 'userInput' expects an argument named 'quantity', sourced from the request
+            body. */
 
             string userInput = data?.quantity;
 
             int quantity;
 
             string responseMessage = int.TryParse(userInput, out quantity)
-                ? JsonConvert.SerializeObject(GeneratePIDs.Generate(quantity))
+                ? JsonConvert.SerializeObject(Generate(pidDbItem.CurrentPid, quantity))
                 : "This HTTP triggered function generates PIDs. Please pass a quantity between 1 and 10 in the request body.";
-
-            if (pidItem == null)
-            {
-                log.LogInformation("PidItem not found");
-            }
-            else
-            {
-                log.LogInformation($"Found PidItem, Description={pidItem.CurrentPid}");
-            }
 
             return new OkObjectResult(responseMessage);
         }

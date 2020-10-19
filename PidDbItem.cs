@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace REBGV.Functions
 {
-    public class PidItem
+    public class PidDbItem
     {
         [JsonProperty("id")]
         public string id { get; set; }
