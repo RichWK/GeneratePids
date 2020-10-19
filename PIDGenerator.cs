@@ -42,14 +42,16 @@ namespace REBGV.Functions
         }
 
 
+        // Here we talk to the CosmosDB database.
+
         private static async Task<string> FetchCurrentPidFromCosmosDb(
             [CosmosDB(
                 databaseName: "pid-database",
                 collectionName: "currentPid",
                 ConnectionStringSetting = "CosmosDBConnection",
-                Id = "{Query.id}",
-                PartitionKey = "{Query.partitionKey}")] ToDoItem toDoItem
-            )
+                Id = "{Query.id}"
+            )]
+            ToDoItem toDoItem)
         {
             return "";
         }
