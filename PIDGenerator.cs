@@ -115,7 +115,7 @@ namespace REBGV.Functions
 
             Container container = client.GetContainer("pid-database", "currentPid");
 
-            await container.ReplaceItemAsync(item, "1").Response;
+            await container.ReplaceItemAsync(item, "1");
         }
     }
 }
