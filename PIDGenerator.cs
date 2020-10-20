@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using static REBGV.Functions.Helpers;
 using System.IO;
-using System.Threading.Tasks;
 
 
 
@@ -29,14 +28,14 @@ namespace REBGV.Functions
         current PID value within a 'PidDbItem' object. */
 
         [FunctionName("PIDGenerator")]
-        public static async Task<IActionResult> Run(
+        public static IActionResult Run(
             [HttpTrigger(
                 AuthorizationLevel.Anonymous,
                 "get",
                 "post",
                 Route = null
             )]
-            HttpRequest req,
+            HttpRequest request,
             [CosmosDB(
                 databaseName: "pid-database",
                 collectionName: "currentPid",
@@ -53,19 +52,9 @@ namespace REBGV.Functions
 
             FetchConfigurationDetails(context);
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            string responseMessage = VerifyRequest(request, pidDbItem);
 
-            /* 'userInput' expects an argument named 'quantity', sourced from the request
-            body. */
-
-            string userInput = data?.quantity;
-
-            int quantity;
-
-            string responseMessage = int.TryParse(userInput, out quantity)
-                ? JsonConvert.SerializeObject(Generate(pidDbItem.CurrentPid, quantity))
-                : "This HTTP triggered function generates PIDs. Please pass a quantity between 1 and 10 in the request body.";
+            
 
             return new OkObjectResult(responseMessage);
         }
@@ -86,12 +75,48 @@ namespace REBGV.Functions
 
 
 
-        // public static async void UpdateDatabase()
-        // {
-            
+        public static string VerifyRequest(HttpRequest request, PidDbItem pidDbItem)
+        {
+            int quantity;
+            int finalPid;
+            string body = new StreamReader(request.Body).ReadToEnd();
+            dynamic contents = JsonConvert.DeserializeObject(body);
 
-        //     using CosmosClient client = new CosmosClient();
-        // }
+            /* 'userInput' is expecting an attribute named 'quantity', sourced from the
+            body of the POST request. */
+
+            string userInput = contents?.quantity;
+
+            if (int.TryParse(userInput, out quantity))
+            {
+                string pids = JsonConvert.SerializeObject(
+                    
+                    GeneratePids(pidDbItem.CurrentPid, quantity, out finalPid)
+                );
+
+                UpdateDatabaseAsync(finalPid);
+
+                return pids;
+            }
+            else
+            {
+                return @"This HTTP triggered function generates PIDs. Please pass a
+                quantity between 1 and 10 in the request body.";
+            }
+        }
+        
+        
+
+        public static async void UpdateDatabaseAsync(int finalPid)
+        {
+            dynamic item = new { id = "1", currentPid = finalPid };
+            
+            using CosmosClient client = new CosmosClient(Config["CosmosDBConnection"]);
+
+            Container container = client.GetContainer("pid-database", "currentPid");
+
+            await container.ReplaceItemAsync(item, "1").Response;
+        }
     }
 }
 

@@ -6,7 +6,7 @@ namespace REBGV.Functions
     {
         private static int _limit { get; } = 10;
 
-        public static List<string> Generate(string startingPid, int quantity)
+        public static List<string> GeneratePids(string startingPid, int quantity, out int finalPid)
         {
             int pid;
             List<string> pids = new List<string>();
@@ -21,6 +21,8 @@ namespace REBGV.Functions
             {
                 pids.Add(new Pid(++pid).FormattedPid);
             }
+
+            finalPid = pid;
 
             return pids;
         }
