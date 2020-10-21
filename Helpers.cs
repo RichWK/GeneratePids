@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace REBGV.Functions
@@ -6,7 +7,7 @@ namespace REBGV.Functions
     {
         private static int _limit { get; } = 10;
 
-        public static List<string> GeneratePids(string startingPid, int quantity, out int finalPid)
+        public static string GeneratePids(string startingPid, int quantity)
         {
             int pid;
             List<string> pids = new List<string>();
@@ -22,9 +23,9 @@ namespace REBGV.Functions
                 pids.Add(new Pid(++pid).FormattedPid);
             }
 
-            finalPid = pid;
+            // UpdateDatabaseAsync()
 
-            return pids;
+            return JsonConvert.SerializeObject(pids);
         }
     }
 }

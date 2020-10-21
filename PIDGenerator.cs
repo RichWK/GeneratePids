@@ -8,8 +8,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using static REBGV.Functions.Helpers;
 using System.IO;
-
-
+using System.Threading.Tasks;
 
 namespace REBGV.Functions
 {
@@ -18,6 +17,10 @@ namespace REBGV.Functions
     {
 
         public static IConfiguration Config { get; private set; }
+        public static PartitionKey Key { get; private set; } = new PartitionKey("1");
+        public static int Quantity { get; private set; }
+        public static int CurrentPid { get; private set; }
+        public static int FinalPid { get; private set; }
 
         /* This method, Run(), is the entry point.
 
@@ -36,86 +39,130 @@ namespace REBGV.Functions
                 Route = null
             )]
             HttpRequest request,
-            [CosmosDB(
-                databaseName: "pid-database",
-                collectionName: "currentPid",
-                ConnectionStringSetting = "CosmosDBConnection",
-                Id = "1",
-                PartitionKey = "1"
-            )]
-            PidDbItem pidDbItem,
             ExecutionContext context,
             ILogger log
         )
         {
             log.LogInformation("PIDGenerator function began processing a request.");
 
-            FetchConfigurationDetails(context);
+            if (VerifyRequest(request))
+            {
+                FetchConfiguration(context);
 
-            string responseMessage = VerifyRequest(request, pidDbItem);
+                using CosmosClient client = new CosmosClient(Config["CosmosDBConnection"]);
+                Container container = client.GetContainer("pid-database", "currentPid");
 
-            
+                ReadFromDatabase(container);
 
-            return new OkObjectResult(responseMessage);
+                // string pids = GeneratePids(ReadFromDatabaseAsync(container),Quantity);
+
+                // UpdateDatabaseAsync
+
+                // return Response(pids);
+
+                return Response("");
+            }
+            else {
+                
+                return Response("");
+            }
         }
 
 
 
-        public static void FetchConfigurationDetails(ExecutionContext context)
+        public static void FetchConfiguration(ExecutionContext context)
         {
-            /* This pulls in settings regardless of whether the function is running in a
-            local development environment or in production on Azure. */
+            /* This pulls in settings for a local development environment AND for when
+            the app is in production in Azure. */
 
             Config = new ConfigurationBuilder()
                 .SetBasePath(context.FunctionAppDirectory)
                 .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables() 
-                .Build(); 
+                .Build();
         }
 
 
 
-        public static string VerifyRequest(HttpRequest request, PidDbItem pidDbItem)
+        public static bool VerifyRequest(HttpRequest request)
         {
-            int quantity;
-            int finalPid;
-            string body = new StreamReader(request.Body).ReadToEnd();
-            dynamic contents = JsonConvert.DeserializeObject(body);
+            int quantity = 0;
 
-            /* 'userInput' is expecting an attribute named 'quantity', sourced from the
-            body of the POST request. */
+            string requestBody = new StreamReader(request.Body).ReadToEnd();
+            dynamic contents = JsonConvert.DeserializeObject(requestBody);
+
+            /* 'userInput' holds the contents of an attribute named 'quantity', which is
+            sourced from the body of the POST request. */
 
             string userInput = contents?.quantity;
 
-            if (int.TryParse(userInput, out quantity))
-            {
-                string pids = JsonConvert.SerializeObject(
+            bool isValidInput = int.TryParse(userInput, out quantity);
+
+            Quantity = quantity;
+
+            return isValidInput;
+        }
+
+
+
+        // public static string VerifyRequestOld(HttpRequest request, PidDbItem pidDbItem)
+        // {
+        //     int quantity;
+        //     int finalPid;
+        //     string body = new StreamReader(request.Body).ReadToEnd();
+        //     dynamic contents = JsonConvert.DeserializeObject(body);
+
+        //     /* 'userInput' is expecting an attribute named 'quantity', sourced from the
+        //     body of the POST request. */
+
+        //     string userInput = contents?.quantity;
+
+        //     if (int.TryParse(userInput, out quantity))
+        //     {
+        //         string pids = JsonConvert.SerializeObject(
                     
-                    GeneratePids(pidDbItem.CurrentPid, quantity, out finalPid)
-                );
+        //             GeneratePids(pidDbItem.CurrentPid, quantity, out finalPid)
+        //         );
 
-                UpdateDatabaseAsync(finalPid);
+        //         UpdateDatabaseAsync(finalPid);
 
-                return pids;
-            }
-            else
-            {
-                return @"This HTTP triggered function generates PIDs. Please pass a
-                quantity between 1 and 10 in the request body.";
-            }
+        //         return pids;
+        //     }
+        //     else
+        //     {
+        //         return @"This HTTP triggered function generates PIDs. Please pass a
+        //         quantity between 1 and 10 in the request body.";
+        //     }
+        // }
+
+
+
+        public static void ReadFromDatabase(Container container)
+        {
+            CurrentPid = int.Parse(container.ReadItemAsync<PidDbItem>("1", Key)
+                .Result
+                .Resource
+                .CurrentPid);
         }
         
         
 
-        public static async void UpdateDatabaseAsync(int finalPid)
+        public static async void UpdateDatabaseAsync()
         {
-            dynamic item = new { id = "1", currentPid = finalPid };
+            dynamic item = new { id = "1", currentPid = FinalPid };
             
-            using CosmosClient client = new CosmosClient(Config["CosmosDBConnection"]);
+            // using CosmosClient client = new CosmosClient(Config["CosmosDBConnection"]);
 
-            Container container = client.GetContainer("pid-database", "currentPid");
+            // Container container = client.GetContainer("pid-database", "currentPid");
 
-            await container.ReplaceItemAsync(item, "1");
+            // await container.ReplaceItemAsync(item, "1");
+        }
+
+
+
+        public static IActionResult Response(string message)
+        {
+            return new OkObjectResult(message);
         }
     }
 }
