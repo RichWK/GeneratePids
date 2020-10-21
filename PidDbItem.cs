@@ -5,7 +5,7 @@ namespace REBGV.Functions
     public class PidDbItem
     {
         [JsonProperty("id")]
-        public string id { get; set; }
+        public string Id { get; set; }
 
         [JsonProperty("currentPid")]
         public string CurrentPid { get; set; }
