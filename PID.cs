@@ -8,7 +8,7 @@ namespace REBGV.Functions
             get { return RawPid.ToString().Insert(3, "-").Insert(7, "-"); }
         }
 
-        // The constructor sets the PID's number based on the integer passed to it.
+        // The PID's number is based on the integer passed to it.
 
         public Pid(int currentPid)
         {
