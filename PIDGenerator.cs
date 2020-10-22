@@ -51,7 +51,7 @@ namespace REBGV.Functions
                 ReadFromDatabase(container);
                 GeneratePids();
 
-                if (UpdateDatabase(container) == "")
+                if (UpdateDatabase(container) == "OK")
                 {
                     return Response(JsonConvert.SerializeObject(Pids));
                 }
@@ -121,11 +121,14 @@ namespace REBGV.Functions
         public static void GeneratePids()
         {
             int pid = _startingPid;
+            Pids = new List<string>();
             
             for(int i = 0; i < _quantity; i++)
             {
                 Pids.Add(new Pid(++pid).FormattedPid);
             }
+
+            _finalPid = pid;
         }
         
         
@@ -138,10 +141,12 @@ namespace REBGV.Functions
                 CurrentPid = _finalPid.ToString()
             };
 
-            return container.ReplaceItemAsync<PidDbItem>(item, "1")
+            var test = container.ReplaceItemAsync<PidDbItem>(item, "1")
                 .Result
                 .StatusCode
                 .ToString();
+
+            return test;
         }
 
 
