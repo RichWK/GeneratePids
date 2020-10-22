@@ -141,12 +141,10 @@ namespace REBGV.Functions
                 CurrentPid = _finalPid.ToString()
             };
 
-            var test = container.ReplaceItemAsync<PidDbItem>(item, "1")
+            return container.ReplaceItemAsync<PidDbItem>(item, "1")
                 .Result
                 .StatusCode
                 .ToString();
-
-            return test;
         }
 
 
