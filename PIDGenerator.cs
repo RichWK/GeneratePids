@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Scripts;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.IO;
 
 
@@ -17,12 +15,8 @@ namespace REBGV.Functions
     public static class PIDGenerator
     {
 
-        public static List<string> Pids = new List<string>();
         private static IConfiguration _config;
-        private static PartitionKey _key = new PartitionKey("1");
         private static int _quantity;
-        private static int _startingPid;
-        private static int _finalPid;
         private static int _limit { get; } = 10;
 
         /* This method, Run(), is the entry point. */
@@ -49,19 +43,7 @@ namespace REBGV.Functions
                 using CosmosClient client = new CosmosClient(_config["CosmosDBConnection"]);
                 Container container = client.GetContainer("pid-database", "currentPid");
 
-                GeneratePids(container);
-
-                // ReadFromDatabase(container);
-                // GeneratePids();
-
-                // if (UpdateDatabase(container) == "OK")
-                // {
-                //     return Response(JsonConvert.SerializeObject(Pids));
-                // }
-                // else
-                // {
-                //     return Response("Failure");
-                // }
+                return Response(GeneratePids(container));
             }
             else {
                 
@@ -109,58 +91,17 @@ namespace REBGV.Functions
 
 
 
-        public static void ReadFromDatabase(Container container)
-        {
-            _startingPid = int.Parse(container.ReadItemAsync<PidDbItem>("1", _key)
-                .Result
-                .Resource
-                .CurrentPid);
-        }
-
-
-
-        public static void GeneratePids(Container container)
+        public static string GeneratePids(Container container)
         {
             // The third parameter here is passed to the stored procedure.
 
-            StoredProcedureExecuteResponse<string> response;
+            return container.Scripts.ExecuteStoredProcedureAsync<string>(
 
-            response = container.Scripts.ExecuteStoredProcedureAsync<string>(
                 "GeneratePids",
                 new PartitionKey("1"),
                 new dynamic[] { _quantity }
-            ).Result;
-        }
 
-
-
-        // public static void GeneratePids()
-        // {
-        //     int pid = _startingPid;
-        //     Pids = new List<string>();
-            
-        //     for(int i = 0; i < _quantity; i++)
-        //     {
-        //         Pids.Add(new Pid(++pid).FormattedPid);
-        //     }
-
-        //     _finalPid = pid;
-        // }
-        
-        
-
-        public static string UpdateDatabase(Container container)
-        {
-            PidDbItem item = new PidDbItem()
-            {
-                Id = "1",
-                CurrentPid = _finalPid.ToString()
-            };
-
-            return container.ReplaceItemAsync<PidDbItem>(item, "1")
-                .Result
-                .StatusCode
-                .ToString();
+            ).Result.Resource;
         }
 
 
