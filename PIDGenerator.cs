@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Scripts;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
@@ -48,19 +49,19 @@ namespace REBGV.Functions
                 using CosmosClient client = new CosmosClient(_config["CosmosDBConnection"]);
                 Container container = client.GetContainer("pid-database", "currentPid");
 
-                ReadFromDatabase(container);
-                GeneratePids();
+                GeneratePids(container);
 
-                if (UpdateDatabase(container) == "OK")
-                {
-                    return Response(JsonConvert.SerializeObject(Pids));
-                }
-                else
-                {
-                    return Response("Failure");
-                }
+                // ReadFromDatabase(container);
+                // GeneratePids();
 
-                
+                // if (UpdateDatabase(container) == "OK")
+                // {
+                //     return Response(JsonConvert.SerializeObject(Pids));
+                // }
+                // else
+                // {
+                //     return Response("Failure");
+                // }
             }
             else {
                 
@@ -118,18 +119,33 @@ namespace REBGV.Functions
 
 
 
-        public static void GeneratePids()
+        public static void GeneratePids(Container container)
         {
-            int pid = _startingPid;
-            Pids = new List<string>();
-            
-            for(int i = 0; i < _quantity; i++)
-            {
-                Pids.Add(new Pid(++pid).FormattedPid);
-            }
+            // The third parameter here is passed to the stored procedure.
 
-            _finalPid = pid;
+            StoredProcedureExecuteResponse<string> response;
+
+            response = container.Scripts.ExecuteStoredProcedureAsync<string>(
+                "GeneratePids",
+                new PartitionKey("1"),
+                new dynamic[] { _quantity }
+            ).Result;
         }
+
+
+
+        // public static void GeneratePids()
+        // {
+        //     int pid = _startingPid;
+        //     Pids = new List<string>();
+            
+        //     for(int i = 0; i < _quantity; i++)
+        //     {
+        //         Pids.Add(new Pid(++pid).FormattedPid);
+        //     }
+
+        //     _finalPid = pid;
+        // }
         
         
 
