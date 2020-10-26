@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System;
 using System.IO;
-
 
 namespace REBGV.Functions
 {
@@ -95,22 +95,36 @@ namespace REBGV.Functions
 
         public static string GeneratePids(Container container)
         {
-            // The third parameter here is passed to the stored procedure.
+            try {
 
-            return container.Scripts.ExecuteStoredProcedureAsync<string>(
+                return container.Scripts.ExecuteStoredProcedureAsync<string>(
 
-                "GeneratePids",
-                new PartitionKey("1"),
-                new dynamic[] { _quantity }
+                    // The third parameter here is passed to the stored procedure.
 
-            ).Result.Resource;
+                    "GeneratePids",
+                    new PartitionKey("1"),
+                    new dynamic[] { _quantity }
+
+                ).Result.Resource;
+            }
+            catch(AggregateException) {
+
+                return "Error";
+            }            
         }
 
 
 
         public static IActionResult Response(string message)
         {
-            return new OkObjectResult(message);
+            if (message != "Error")
+            {
+                return new OkObjectResult(message);
+            }
+            else
+            {
+                return new StatusCodeResult(500);
+            }
         }
     }
 }
