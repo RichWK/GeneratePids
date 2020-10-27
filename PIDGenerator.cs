@@ -11,7 +11,6 @@ using System.IO;
 
 namespace REBGV.Functions
 {
-
     public static class PIDGenerator
     {
 
@@ -42,8 +41,6 @@ namespace REBGV.Functions
 
                 using CosmosClient client = new CosmosClient(_config["CosmosDBConnection"]);
                 Container container = client.GetContainer("pid-database", "currentPid");
-
-                // TODO: return a different status in the event of a failure.
 
                 return Response(GeneratePids(container));
             }
